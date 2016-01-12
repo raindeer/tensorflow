@@ -39,7 +39,13 @@ PyObject* GetPyTrampoline() {
 }
 
 // Module initialization (mainly import numpy) if needed.
-void InitIfNeeded() {
+// Must return int since the import_array() macro does on error.
+#if PY_MAJOR_VERSION >= 3
+int
+#else
+void
+#endif 
+InitIfNeeded() {
   mutex_lock l(mu);
   if (!initialized) {
     PyGILState_STATE py_threadstate;
@@ -48,6 +54,7 @@ void InitIfNeeded() {
     PyGILState_Release(py_threadstate);
     initialized = true;
   }
+  return NUMPY_IMPORT_ARRAY_RETVAL;
 }
 
 // Returns a single-thread threadpool used to execute python

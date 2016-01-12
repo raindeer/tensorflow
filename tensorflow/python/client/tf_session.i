@@ -204,8 +204,15 @@ tensorflow::ImportNumpy();
 // The wrapped function TF_GetOpList returns a TF_Buffer pointer. This typemap
 // creates a Python string from the TF_Buffer and returns it.
 %typemap(out) TF_Buffer TF_GetOpList {
-  $result = PyString_FromStringAndSize(
+
+#if PY_MAJOR_VERSION < 3
+    $result = PyString_FromStringAndSize(
       reinterpret_cast<const char*>($1.data), $1.length);
+#else
+    $result = PyUnicode_FromStringAndSize(
+      reinterpret_cast<const char*>($1.data), $1.length);
+#endif
+  
 }
 
 // Include the functions from tensor_c_api.h, except TF_Run.
